@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carica una foto e genera il testo del tuo Post con l'AI</title>
+    <style>
+        :root {
+            --bg-color: #f0f4f8;
+            --text-color: #2c3e50;
+            --primary-color: #a0d2eb;
+            --secondary-color: #e5eaf5;
+            --accent-color: #d0bdf4;
+            --button-hover: #8458B3;
+            --instagram-color: #E1306C;
+            --twitter-color: #1DA1F2;
+            --facebook-color: #4267B2;
+        }
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .menu-bar {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+        .menu-bar img {
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+        }
+        .menu-bar .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: var(--secondary-color);
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            border-radius: 5px;
+            overflow: hidden;
+            right: 0;
+            text-align: right;
+        }
+        .dropdown-content a {
+            color: var(--text-color);
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+        .dropdown-content a:hover {
+            background-color: var(--accent-color);
+        }
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        .burger-menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+        .burger-menu div {
+            width: 30px;
+            height: 3px;
+            background-color: #333;
+            margin: 4px 0;
+            transition: 0.4s;
+        }
+        .burger-menu-content {
+            display: none;
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            z-index: 1000;
+        }
+        .burger-menu-content a {
+            display: block;
+            padding: 10px 20px;
+            text-decoration: none;
+            color: #333;
+            transition: background 0.3s;
+        }
+        .burger-menu-content a:hover {
+            background: #f0f0f0;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: var(--text-color);
+            text-shadow: 1px 1px 2px #fff;
+        }
+        .step-container {
+            position: relative;
+            margin-bottom: 30px;
+            border: 2px solid rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+        }
+        .step-label {
+            position: absolute;
+            top: -20px;
+            left: 10px;
+            background-color: #fff;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        input[type="file"] {
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #333;
+            box-sizing: border-box;
+        }
+        #imageUploadContainer {
+            display: flex;
+            align-items: center;
+        }
+        #imageUpload {
+            flex-grow: 1;
+        }
+        #imagePreview {
+            width: 50px;
+            height: 50px;
+            margin-left: 10px;
+            object-fit: cover;
+            border-radius: 5px;
+            display: none;
+        }
+        #imageText {
+            margin-right: 10px;
+            font-size: 14px;
+            color: #555;
+            display: none;
+        }
+        #styleButtons {
+            margin-bottom: 15px;
+        }
+        .style-button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .style-button.selected {
+            background-color: var(--primary-color);
+        }
+        .style-button:hover {
+            background-color: var(--button-hover);
+        }
+        #generateBtn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        #generateBtn:hover {
+            background-color: var(--button-hover);
+        }
+        .caption-container {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .caption-box {
+            position: relative;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            line-height: 1.5;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .caption-box input[type="checkbox"] {
+            margin-left: 10px;
+        }
+        .copy-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--primary-color);
+            margin-left: 10px;
+        }
+        .copy-icon i {
+            font-size: 16px;
+        }
+        .copy-icon:hover {
+            color: var(--button-hover);
+        }
+        #previewBtn {
+            display: none;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+        #previewBtn:hover {
+            background-color: var(--button-hover);
+        }
+        .instagram-preview {
+            margin-top: 30px;
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid #dbdbdb;
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .instagram-caption {
+            padding: 10px 15px;
+            font-size: 14px;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            line-height: 1.5;
+            overflow-wrap: break-word;
+            max-width: 100%;
+            box-sizing: border-box;
+            border-top: 1px solid #dbdbdb;
+            height: auto;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        /* Step 4 initially hidden */
+        #step4Container {
+            display: none;
+        }
+    </style>
+    <!-- Collegamento a FontAwesome per le icone -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" crossorigin="anonymous">
+
+</head>
+<body>
+    <!-- Barra di navigazione -->
+    <div class="menu-bar">
+        <div class="dropdown">
+            <img id="accountIcon" src="account-icon-guest.png" alt="Account">
+            <div class="dropdown-content">
+                <a href="registrazione.html">Registrati al sito</a>
+                <a href="login.html">Effettua il Login</a>
+            </div>
+        </div>
+        <div class="burger-menu" onclick="toggleMenu()">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </div>
+    <div class="burger-menu-content" id="burgerMenuContent">
+        <a href="registrazione.html">Registrati al sito</a>
+        <a href="login.html">Effettua il Login</a>
+        <a href="FAQ.html">Domande Frequenti</a>
+        <a href="Donazione.html">Sostienici con una donazione</a>
+    </div>
+
+    <!-- Contenitore principale -->
+    <div class="container">
+        <h1>Carica una foto e genera il testo del tuo Post con l'AI</h1>
+
+        <div class="step-container">
+            <div class="step-label">Step 1: seleziona l'immagine che vuoi postare</div>
+            <div id="imageUploadContainer">
+                <input type="file" id="imageUpload" accept="image/*">
+                <span id="imageText">l'immagine per il tuo Post</span>
+                <img id="imagePreview" alt="Anteprima Immagine">
+            </div>
+        </div>
+
+        <div class="step-container">
+            <div class="step-label">Step 2: Scegli lo stile del testo che vuoi generare</div>
+            <div id="styleButtons"></div>
+        </div>
+
+        <div class="step-container">
+            <div class="step-label">Step 3: fai click per generare il testo</div>
+            <button id="generateBtn">Genera Caption con AI</button>
+        </div>
+
+        <!-- Step 4 -->
+        <div id="step4Container" class="step-container">
+            <div class="step-label">Step 4: Scegli la versione che preferisci e vedi l'anteprima</div>
+            <div id="captionContainer" class="caption-container"></div>
+            <button id="previewBtn">Vedi l'anteprima del tuo post</button>
+        </div>
+
+        <div id="instagramPreview" class="instagram-preview" style="display:none;">
+            <div class="instagram-header">
+                <img src="https://via.placeholder.com/32" alt="user">
+                <span class="instagram-username">username</span>
+            </div>
+            <img id="instagramImage" src="" alt="Preview Image" class="instagram-image">
+            <div id="instagramCaption" class="instagram-caption"></div>
+        </div>
+    </div>
+
+   <script type="module" src="app.js"></script>
+
+    <script>
+        function toggleMenu() {
+            const menu = document.getElementById('burgerMenuContent');
+            if (menu.style.display === 'block') {
+                menu.style.display = 'none';
+            } else {
+                menu.style.display = 'block';
+            }
+        }
+
+        // Esempio di script per generare testo e mostrare il pulsante di anteprima
+        document.getElementById('generateBtn').addEventListener('click', function() {
+            // Simulazione della generazione del testo
+            const captions = ["Caption 1 generata", "Caption 2 generata", "Caption 3 generata"];
+            const captionContainer = document.getElementById('captionContainer');
+
+            captionContainer.innerHTML = ""; // Pulisce il contenitore delle caption precedenti
+            captions.forEach(caption => {
+                const captionBox = document.createElement('div');
+                captionBox.className = 'caption-box';
+                captionBox.textContent = caption;
+
+                // Checkbox per la selezione della caption
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'caption-checkbox';
+
+                // Aggiunta del pulsante di copia
+                const copyIcon = document.createElement('div');
+                copyIcon.className = 'copy-icon';
+                copyIcon.innerHTML = '<i class="fas fa-copy"></i>';
+                copyIcon.addEventListener('click', () => copyToClipboard(caption));
+
+                captionBox.appendChild(checkbox);
+                captionBox.appendChild(copyIcon);
+                captionContainer.appendChild(captionBox);
+            });
+
+            // Mostra Step 4 e il pulsante di anteprima
+            document.getElementById('step4Container').style.display = 'block';
+            document.getElementById('previewBtn').style.display = 'inline-block';
+        });
+
+        // Funzione per copiare il testo negli appunti utilizzando un approccio alternativo
+        function copyToClipboard(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+
+            // Assicurati che il textarea sia fuori dallo schermo
+            textArea.style.position = 'fixed';
+            textArea.style.top = '0';
+            textArea.style.left = '0';
+            textArea.style.width = '2em';
+            textArea.style.height = '2em';
+            textArea.style.padding = '0';
+            textArea.style.border = 'none';
+            textArea.style.outline = 'none';
+            textArea.style.boxShadow = 'none';
+            textArea.style.background = 'transparent';
+
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                const msg = successful ? 'Testo copiato negli appunti!' : 'Errore durante la copia del testo.';
+                alert(msg);
+            } catch (err) {
+                alert('Errore durante la copia del testo: ' + err);
+            }
+
+            document.body.removeChild(textArea);
+        }
+    </script>
+</body>
+</html>
