@@ -1,7 +1,7 @@
 // config.js
 
 // Inserisci la tua chiave API qui in chiaro
-const apiKey = 'sk-pLZLS5xiLkzUmmwz0xeCbKwv3OzYde128Ek-0cGYEXT3BlbkFJQtPWTN3ni9SP5pYJDPNF2-OglUmkUBPzjtkYAIvqcA';
+const apiKey = 'sk-KlPjxMi9CYY7-LO6KcvLncNbaL7vxqWWcFwHSfpf7_T3BlbkFJkjiHEL-LhXkmqhfoMsUHYZbyBz-9RCtWzDIIo5NOYA';
 
 // Codifica la chiave API in base64 per offuscarla
 const encodedApiKey = btoa(apiKey);
